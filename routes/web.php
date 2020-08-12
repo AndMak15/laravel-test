@@ -19,4 +19,9 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::get('/gift/cancel', 'GiftController@cancel');
+Route::get('/gift/convert', 'GiftController@convert');
+Route::get('/gift/action', 'GiftController@action');
+Route::resource('gift', 'GiftController');
+
 Route::get('/home', 'HomeController@index')->name('home');
