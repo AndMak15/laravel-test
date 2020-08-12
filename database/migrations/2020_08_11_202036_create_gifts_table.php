@@ -17,7 +17,8 @@ class CreateGiftsTable extends Migration
             $table->id();
             $table->smallInteger('type')->comment('Type gift');
             $table->integer('id_user')->comment('Who gets gift');
-            $table->smallInteger('id_send')->comment('Is send gift');
+            $table->smallInteger('is_send')->comment('Is send gift');
+            $table->text('data_type')->comment('Data type gift');
             $table->timestamps();
         });
     }

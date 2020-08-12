@@ -1926,7 +1926,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -1938,7 +1937,10 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var app = this;
     axios.get('/gift').then(function (resp) {
-      app.gift = resp.data;
+      if (resp.data) {
+        app.gift = resp.data;
+      }
+
       app.isLoad = true;
     })["catch"](function (resp) {
       console.log(resp);
@@ -1949,7 +1951,9 @@ __webpack_require__.r(__webpack_exports__);
     getGift: function getGift() {
       var app = this;
       axios.get('/gift/create').then(function (resp) {
-        app.gift = resp.data;
+        if (resp.data) {
+          app.gift = resp.data;
+        }
       })["catch"](function (resp) {
         console.log(resp);
         alert("Не вдалося отримати подарунок");
@@ -37598,7 +37602,7 @@ var render = function() {
                 attrs: { type: "button" },
                 on: { click: _vm.getGift }
               },
-              [_vm._v("Get gift")]
+              [_vm._v("Отримати подарунок")]
             )
           ])
         : _c("div", { staticClass: "panel panel-default" }, [
@@ -37611,18 +37615,18 @@ var render = function() {
             _c(
               "button",
               {
-                staticClass: "btn btn-primary mb-3",
+                staticClass: "btn btn-primary mb-3 d-block",
                 attrs: { type: "button" },
                 on: { click: _vm.actionGift }
               },
-              [_vm._v(_vm._s(_vm.gift.actionTitle))]
+              [_vm._v(_vm._s(_vm.gift.actionTitleButton))]
             ),
             _vm._v(" "),
             _vm.gift.isConvert
               ? _c(
                   "button",
                   {
-                    staticClass: "btn btn-primary mb-3",
+                    staticClass: "btn btn-primary mb-3 d-block",
                     attrs: { type: "button" },
                     on: { click: _vm.convertGift }
                   },
@@ -37633,7 +37637,7 @@ var render = function() {
             _c(
               "button",
               {
-                staticClass: "btn btn-primary",
+                staticClass: "btn btn-primary mb-3 d-block",
                 attrs: { type: "button" },
                 on: { click: _vm.cancelGift }
               },

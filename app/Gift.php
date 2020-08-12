@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Gift extends Model
 {
-    protected $fillable = ['type', 'id_user', 'is_send'];
+    const NOT_SEND = 0;
+    const SEND = 1;
+
+    protected $fillable = ['type', 'id_user', 'is_send', 'data_type'];
 }

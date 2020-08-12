@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Gift;
-use Illuminate\Http\Request;
+use App\Models\Gift\Convert\GiftConvert;
+use App\Models\Gift\Convert\GiftConvertToPoints;
+use App\Models\Gift\GiftRandom;
+use App\Models\Gift\Gifts\GiftItem;
+use App\Models\Gift\Gifts\PointsGift;
 use Illuminate\Support\Facades\Auth;
 
 class GiftController extends Controller
@@ -24,10 +28,19 @@ class GiftController extends Controller
      */
     public function index()
     {
+        $idUser = Auth::id();
+        $giftTable = Gift::query()->where(['id_user' => $idUser, 'is_send' => Gift::NOT_SEND])->first();
+        if (!$giftTable) {
+            return null;
+        }
+
+        $giftRand = new GiftRandom();
+        $gift = $giftRand->getItem($giftTable->type, $giftTable->data_type);
+
         return [
-            'title' => 'Грошова винагорода у розмірі: 1001$',
-            'actionTitle' => 'Відправити на банківський рахунок',
-            'isConvert' => true,
+            'title' => $gift->getTitle(),
+            'actionTitleButton' => $gift->actionTitleButton(),
+            'isConvert' => $gift->isConvertToPoint(),
         ];
     }
 
@@ -37,6 +50,16 @@ class GiftController extends Controller
      */
     public function cancel()
     {
+        $idUser = Auth::id();
+        $giftTable = Gift::query()->where(['id_user' => $idUser, 'is_send' => Gift::NOT_SEND])->first();
+        if (!$giftTable) {
+            return [
+                'titleSuccess' => 'Подарунок не знайдено',
+            ];
+        }
+
+        $giftTable->delete();
+
         return [
             'response' => true,
         ];
@@ -48,8 +71,26 @@ class GiftController extends Controller
      */
     public function action()
     {
+        $idUser = Auth::id();
+        $giftTable = Gift::query()->where(['id_user' => $idUser, 'is_send' => Gift::NOT_SEND])->first();
+        if (!$giftTable) {
+            return [
+                'titleSuccess' => 'Подарунок не знайдено',
+            ];
+        }
+
+        $giftTable->is_send = Gift::SEND;
+        if ($giftTable->save()) {
+            $giftRand = new GiftRandom();
+
+            $gift = $giftRand->getItem($giftTable->type, $giftTable->data_type);
+            return [
+                'titleSuccess' => $gift->actionTitleSuccess(),
+            ];
+        }
+
         return [
-            'titleSuccess' => 'Перераховано',
+            'titleSuccess' => 'Помилка обробки подарунку',
         ];
     }
 
@@ -59,8 +100,37 @@ class GiftController extends Controller
      */
     public function convert()
     {
+        $idUser = Auth::id();
+        $giftTable = Gift::query()->where(['id_user' => $idUser, 'is_send' => Gift::NOT_SEND])->first();
+        if (!$giftTable) {
+            return [
+                'titleSuccess' => 'Подарунок не знайдено',
+            ];
+        }
+
+        $giftRand = new GiftRandom();
+        $gift = $giftRand->getItem($giftTable->type, $giftTable->data_type);
+
+        if ( !( $gift instanceof GiftConvertToPoints ) ) {
+            return [
+                'titleSuccess' => 'Подарунок конвертувати неможливо',
+            ];
+        }
+
+        /** @var GiftItem $newGift */
+        $newGift = GiftConvert::toPoints($gift);
+        $giftTable->type = PointsGift::TYPE_GIFT;
+        $giftTable->data_type = $newGift->getData();
+        $giftTable->is_send = Gift::SEND;
+
+        if (!$giftTable->save()) {
+            return [
+                'titleSuccess' => 'Невдала спроба конвертувати подарунок',
+            ];
+        }
+
         return [
-            'titleSuccess' => 'Конвертація успішна',
+            'titleSuccess' => 'Конвертація успішна. Ви отримали ' . $newGift->getTitle(),
         ];
     }
 
@@ -70,10 +140,24 @@ class GiftController extends Controller
      */
     public function create()
     {
+        $giftRand = new GiftRandom();
+        $gift = $giftRand->run();
+
+        $idUser = Auth::id();
+        $giftTable = Gift::query()->where(['id_user' => $idUser, 'is_send' => Gift::NOT_SEND])->first();
+        if (!$giftTable) {
+            $giftTable = new Gift();
+            $giftTable->type = $gift::TYPE_GIFT;
+            $giftTable->id_user = $idUser;
+            $giftTable->is_send = Gift::NOT_SEND;
+            $giftTable->data_type = $gift->getData();
+            $giftTable->save();
+        }
+
         return [
-            'title' => 'Грошова винагорода у розмірі: 1001$',
-            'actionTitle' => 'Відправити на банківський рахунок',
-            'isConvert' => true,
+            'title' => $gift->getTitle(),
+            'actionTitleButton' => $gift->actionTitleButton(),
+            'isConvert' => $gift->isConvertToPoint(),
         ];
     }
 }

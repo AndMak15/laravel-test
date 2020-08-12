@@ -4,15 +4,14 @@
             <div class="panel-heading">{{titleSuccess}}</div>
         </div>
         <div v-else-if="gift === null" class="form-group">
-            <button type="button" v-on:click="getGift"  class="btn btn-primary">Get gift</button>
+            <button type="button" v-on:click="getGift"  class="btn btn-primary">Отримати подарунок</button>
         </div>
         <div v-else class="panel panel-default">
             <div class="panel-heading">Ваш подарунок:</div>
             <p>{{gift.title}}</p>
-            <button type="button" v-on:click="actionGift"  class="btn btn-primary mb-3">{{gift.actionTitle}}</button>
-            <button v-if="gift.isConvert" type="button" v-on:click="convertGift"  class="btn btn-primary mb-3">Конвертувати на рахунок лояльності</button>
-
-            <button type="button" v-on:click="cancelGift"  class="btn btn-primary">Відмовитись від подарунку</button>
+            <button type="button" v-on:click="actionGift"  class="btn btn-primary mb-3 d-block">{{gift.actionTitleButton}}</button>
+            <button v-if="gift.isConvert" type="button" v-on:click="convertGift"  class="btn btn-primary mb-3 d-block">Конвертувати на рахунок лояльності</button>
+            <button type="button" v-on:click="cancelGift"  class="btn btn-primary mb-3 d-block">Відмовитись від подарунку</button>
         </div>
     </div>
 </template>
@@ -30,7 +29,9 @@
             var app = this;
             axios.get('/gift')
                 .then(function (resp) {
-                    app.gift = resp.data;
+                    if ( resp.data ) {
+                        app.gift = resp.data;
+                    }
                     app.isLoad = true;
                 })
                 .catch(function (resp) {
@@ -43,7 +44,9 @@
                 var app = this;
                 axios.get('/gift/create')
                     .then(function (resp) {
-                        app.gift = resp.data;
+                        if ( resp.data ) {
+                            app.gift = resp.data;
+                        }
                     })
                     .catch(function (resp) {
                         console.log(resp);
