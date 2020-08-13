@@ -89,4 +89,12 @@ class PointsGift implements GiftItem
             'points' => $this->points
         ]);
     }
+
+    /**
+     * @return int
+     */
+    public function getPoints(): int
+    {
+        return $this->points;
+    }
 }
